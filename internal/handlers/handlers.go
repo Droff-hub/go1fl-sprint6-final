@@ -88,8 +88,8 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Возвращаем результат конвертации
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(converted))
+	// Возвращаем результат конвертации без лишних пробелов и переносов
+w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+w.WriteHeader(http.StatusOK)
+w.Write([]byte(strings.TrimSpace(converted)))
 }
