@@ -1,3 +1,3 @@
-module github.com/Yandex-Practicum/golf1-sprint6-final
+module github.com/Droff-hub/golf1-sprint6-final
 
 go 1.24.0

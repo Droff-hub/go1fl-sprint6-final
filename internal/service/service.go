@@ -4,7 +4,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/Yandex-Practicum/golf1-sprint6-final/pkg/morse"
+	"github.com/Droff-hub/golf1-sprint6-final/pkg/morse"
 )
 
 func Convert(input string) (string, error) {

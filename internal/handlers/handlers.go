@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Yandex-Practicum/golf1-sprint6-final/internal/service"
+	"github.com/Droff-hub/golf1-sprint6-final/internal/service"
 )
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
@@ -49,14 +49,14 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	// Читаем содержимое
+	// Читаем содержимое файла
 	data, err := io.ReadAll(file)
 	if err != nil {
 		http.Error(w, "Ошибка чтения файла", http.StatusInternalServerError)
 		return
 	}
 
-	// Конвертируем
+	// Конвертируем содержимое
 	converted, err := service.Convert(string(data))
 	if err != nil {
 		http.Error(w, "Ошибка конвертации", http.StatusInternalServerError)

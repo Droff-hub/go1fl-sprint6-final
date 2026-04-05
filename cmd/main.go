@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/Yandex-Practicum/golf1-sprint6-final/internal/server"
+	"github.com/Droff-hub/golf1-sprint6-final/internal/server"
 )
 
 func main() {
