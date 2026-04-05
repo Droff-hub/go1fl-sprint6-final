@@ -1,21 +1,20 @@
 package main
 
 import (
-	"log"
-	"os"
+    "log"
+    "os"
 
-	"github.com/Droff-hub/golf1-sprint6-final/internal/server"
+    "github.com/Droff-hub/golf1-sprint6-final/internal/server"
 )
 
 func main() {
-	logger := log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
+    logger := log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
 
-	srv := server.NewServer(logger)
+    srv := server.NewServer(logger)
 
-	logger.Println("Запуск сервера на http://localhost:8080")
+    logger.Println("Запуск сервера на http://localhost:8080")
 
-	err := srv.Server.ListenAndServe()
-	if err != nil {
-		logger.Fatalf("Ошибка при запуске сервера: %v", err)
-	}
+    if err := srv.Server.ListenAndServe(); err != nil {
+        logger.Fatalf("Ошибка при запуске сервера: %v", err)
+    }
 }

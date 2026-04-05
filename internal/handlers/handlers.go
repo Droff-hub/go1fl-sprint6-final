@@ -1,7 +1,6 @@
 package handlers
 
 import (
-    "fmt"
     "html/template"
     "io"
     "net/http"
@@ -19,6 +18,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "Ошибка загрузки страницы", http.StatusInternalServerError)
         return
     }
+
     w.Header().Set("Content-Type", "text/html; charset=utf-8")
     err = tmpl.Execute(w, nil)
     if err != nil {
@@ -28,57 +28,38 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
-    fmt.Println("=== UploadHandler hit ===")
-
     if r.Method != http.MethodPost {
         http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
         return
     }
 
-    err := r.ParseMultipartForm(10 << 20)
+    err := r.ParseMultipartForm(10 << 20) // 10 MB
     if err != nil {
-        fmt.Println("ParseMultipartForm error:", err)
-        http.Error(w, "Ошибка парсинга формы: "+err.Error(), http.StatusInternalServerError)
+        http.Error(w, "Ошибка парсинга формы", http.StatusInternalServerError)
         return
     }
 
-    // Выводим все ключи формы
-    if r.MultipartForm != nil {
-        fmt.Println("Form fields:")
-        for key := range r.MultipartForm.File {
-            fmt.Printf("  - %s\n", key)
-        }
-    } else {
-        fmt.Println("r.MultipartForm is nil")
-    }
-
-    // Пробуем получить файл по имени "file"
-    file, header, err := r.FormFile("file")
+    // ВАЖНО: тесты ожидают поле с именем "myFile"
+    file, header, err := r.FormFile("myFile")
     if err != nil {
-        fmt.Printf("FormFile(\"file\") error: %v\n", err)
-        http.Error(w, "Ошибка получения файла: "+err.Error(), http.StatusInternalServerError)
+        http.Error(w, "Ошибка получения файла", http.StatusInternalServerError)
         return
     }
     defer file.Close()
-    fmt.Printf("File received: %s, size: ?\n", header.Filename)
 
     data, err := io.ReadAll(file)
     if err != nil {
-        fmt.Println("ReadAll error:", err)
         http.Error(w, "Ошибка чтения файла", http.StatusInternalServerError)
         return
     }
-    fmt.Printf("Read %d bytes\n", len(data))
 
     converted, err := service.Convert(string(data))
     if err != nil {
-        fmt.Println("Convert error:", err)
         http.Error(w, "Ошибка конвертации", http.StatusInternalServerError)
         return
     }
-    fmt.Printf("Converted: %s\n", converted)
 
-    // Сохраняем файл
+    // Генерируем имя для выходного файла
     ext := filepath.Ext(header.Filename)
     timestamp := time.Now().UTC().String()
     timestamp = strings.Map(func(r rune) rune {
@@ -88,16 +69,23 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
         return r
     }, timestamp)
     outputFilename := "converted_" + timestamp + ext
+
+    // Сохраняем результат в файл
     outFile, err := os.Create(outputFilename)
     if err != nil {
-        fmt.Println("Create file error:", err)
         http.Error(w, "Ошибка создания файла", http.StatusInternalServerError)
         return
     }
     defer outFile.Close()
-    outFile.WriteString(converted)
 
+    _, err = outFile.WriteString(converted)
+    if err != nil {
+        http.Error(w, "Ошибка записи в файл", http.StatusInternalServerError)
+        return
+    }
+
+    // Возвращаем результат конвертации (обрезаем пробелы/переносы)
     w.Header().Set("Content-Type", "text/plain; charset=utf-8")
     w.WriteHeader(http.StatusOK)
-    w.Write([]byte(converted))
+    w.Write([]byte(strings.TrimSpace(converted)))
 }
