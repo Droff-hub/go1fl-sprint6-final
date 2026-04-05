@@ -28,17 +28,20 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
+	// Только POST
 	if r.Method != http.MethodPost {
 		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
 		return
 	}
 
+	// Парсим форму (10 MB)
 	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
 		http.Error(w, "Ошибка парсинга формы", http.StatusInternalServerError)
 		return
 	}
 
+	// Получаем файл из формы — поле должно называться "file"
 	file, header, err := r.FormFile("file")
 	if err != nil {
 		http.Error(w, "Ошибка получения файла", http.StatusInternalServerError)
@@ -46,18 +49,21 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
+	// Читаем содержимое
 	data, err := io.ReadAll(file)
 	if err != nil {
 		http.Error(w, "Ошибка чтения файла", http.StatusInternalServerError)
 		return
 	}
 
+	// Конвертируем
 	converted, err := service.Convert(string(data))
 	if err != nil {
 		http.Error(w, "Ошибка конвертации", http.StatusInternalServerError)
 		return
 	}
 
+	// Генерируем имя для выходного файла
 	ext := filepath.Ext(header.Filename)
 	timestamp := time.Now().UTC().String()
 	timestamp = strings.Map(func(r rune) rune {
@@ -68,6 +74,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	}, timestamp)
 	outputFilename := "converted_" + timestamp + ext
 
+	// Сохраняем результат в файл
 	outFile, err := os.Create(outputFilename)
 	if err != nil {
 		http.Error(w, "Ошибка создания файла", http.StatusInternalServerError)
@@ -81,6 +88,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Возвращаем результат конвертации
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(converted))

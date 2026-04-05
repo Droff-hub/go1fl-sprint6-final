@@ -9,11 +9,11 @@ import (
 
 func Convert(input string) (string, error) {
 	input = strings.TrimSpace(input)
-
 	if input == "" {
 		return "", nil
 	}
 
+	// Проверяем, состоит ли строка только из символов Морзе (. - и пробелы)
 	isMorse := true
 	for _, ch := range input {
 		if ch != '.' && ch != '-' && ch != ' ' && ch != '\n' && ch != '\r' {
@@ -22,6 +22,7 @@ func Convert(input string) (string, error) {
 		}
 	}
 
+	// Если есть буквы — это точно текст
 	hasLetter := false
 	for _, ch := range input {
 		if unicode.IsLetter(ch) {

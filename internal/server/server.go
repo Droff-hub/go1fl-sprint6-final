@@ -1,11 +1,11 @@
 package server
 
 import (
-	"log"
-	"net/http"
-	"time"
+    "log"
+    "net/http"
+    "time"
 
-	"github.com/Yandex-Practicum/golf1-sprint6-final/internal/handlers"
+    "github.com/Yandex-Practicum/golf1-sprint6-final/internal/handlers"
 )
 
 type Server struct {
